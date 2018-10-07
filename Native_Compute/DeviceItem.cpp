@@ -1,4 +1,4 @@
-﻿// MIT License
+// MIT License
 // 
 // Copyright(c) 2018 Ilia Kosenkov
 // 
@@ -20,28 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+#include "DeviceItem.h"
 
-namespace CS_Interop
+VOID free_device_item(device_item& item)
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    [DebuggerDisplay("{" + nameof(Description) + "} : {DedicatedVideoMemory.ToUInt64()}")]
-    // ReSharper disable once InconsistentNaming
-    public struct DXGI_ADAPTER_DESC
-    {
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-        public string Description;
+	item.context.Reset();
+	item.context = nullptr;
+	item.device.Reset();
+	item.device = nullptr;
+	item.adapter.Reset();
+	item.adapter = nullptr;
+	RtlZeroMemory(&item.descriptor, sizeof(DXGI_ADAPTER_DESC));
 
-        public uint VendorId;
-        public uint DeviceId;
-        public uint SubSysId;
-        public uint RevisionId;
-        public UIntPtr DedicatedVideoMemory;
-        public UIntPtr DedicatedSystemMemory;
-        public UIntPtr DedicatedSharedMemory;
-        public ulong LuidLow;
-        public long LuidHigh;
-    }
+	debug_print("free_device_item");
 }
+

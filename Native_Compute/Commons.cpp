@@ -20,37 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-
 #include "Commons.h"
-#include "DeviceItem.h"
 
-#define EXPORT extern "C" __declspec(dllexport)
-
-// PreDefined flags
-CONST UINT global_device_creation_flags = 
-#ifdef _DEBUG
-D3D11_CREATE_DEVICE_DEBUG |
-#endif
-D3D11_CREATE_DEVICE_DISABLE_GPU_TIMEOUT;
-
-CONST D3D_FEATURE_LEVEL global_device_feature_levels[] = 
-{ D3D_FEATURE_LEVEL_11_0 };
-
-
-// Globals used in interop scenarios
-PTR<IDXGIFactory> factory;
-std::vector<device_item> devices;
-INT selected_device_id = -1;
-
-// Exports
-EXPORT HRESULT get_factory(_Out_ VOID** pp_factory);
-EXPORT HRESULT create_factory();
-EXPORT HRESULT list_devices(_Out_ INT* n_dev);
-EXPORT HRESULT free_resources();
-EXPORT HRESULT get_adapter_descriptor(_In_ INT index, _Out_ BYTE* desc);
-EXPORT HRESULT select_device(_In_ INT dev_id);
-
-
-
-EXPORT VOID add(_In_ INT a, _In_ INT b, _Out_ INT* c);
+VOID debug_print(CONST std::string& name)
+{
+	#ifdef _DEBUG
+	std::cerr <<
+		std::setw(40) <<
+		name <<
+		std::setw(10) <<
+		std::this_thread::get_id() <<
+		std::endl;
+	#endif
+}

@@ -79,7 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DllHandler.cs" />
-    <Compile Include="DXGI_ADAPTER_DESC.cs" />
+    <Compile Include="DXGI_ADAPTER_DESC_EX.cs" />
     <Compile Include="Interop.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

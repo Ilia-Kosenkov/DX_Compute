@@ -24,6 +24,8 @@
     <ClInclude Include="Interop.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Commons.cpp" />
+    <ClCompile Include="DeviceItem.cpp" />
     <ClCompile Include="Interop.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

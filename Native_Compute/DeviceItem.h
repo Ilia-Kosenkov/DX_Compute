@@ -28,4 +28,9 @@ struct device_item
 {
 	PTR<IDXGIAdapter> adapter;
 	DXGI_ADAPTER_DESC descriptor;
+	PTR<ID3D11Device> device;
+	PTR<ID3D11DeviceContext> context;
 };
+
+
+VOID free_device_item(device_item& item);

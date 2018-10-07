@@ -22,6 +22,7 @@
 
 #pragma once
 
+// ReSharper disable CppUnusedIncludeDirective
 #include <Windows.h>
 #include <wrl.h>
 #include <d3d11.h>
@@ -32,7 +33,9 @@
 #include <iomanip>
 #include <string>
 #include <thread>
-#include <atomic>
+// ReSharper restore CppUnusedIncludeDirective
 
 
 #define PTR Microsoft::WRL::ComPtr
+
+VOID debug_print(CONST std::string& name);

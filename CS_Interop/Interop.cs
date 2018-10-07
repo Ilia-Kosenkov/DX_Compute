@@ -82,6 +82,12 @@ namespace CS_Interop
             param = (T) pars[0];
         }
 
+        public static void ExecuteOneIn<T>(this Delegate del, T param)
+        {
+            if (!IsOk((int)del.DynamicInvoke(param), out var ex))
+                throw ex;
+        }
+
         public static void ExecuteOneInOneOut<T1, T2>(this Delegate del, T1 inParam, out T2 outParam)
         {
             var pars = new object[] { inParam, default(T2) };

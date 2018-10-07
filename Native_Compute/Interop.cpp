@@ -22,20 +22,7 @@
 
 #include  "Interop.h"
 
-void debug_print(const std::string& name)
-{
-	#ifdef _DEBUG
-	std::cerr <<
-		std::setw(40) <<
-		name <<
-		std::setw(10) <<
-		std::this_thread::get_id() <<
-		std::endl;
-	#endif
-}
-
-
-EXPORT HRESULT get_factory(_Out_ void** pp_factory)
+EXPORT HRESULT get_factory(_Out_ VOID** pp_factory)
 {
 	
 	*pp_factory = reinterpret_cast<void*>(factory.Get());
@@ -49,7 +36,7 @@ EXPORT HRESULT create_factory()
 	IDXGIFactory* p_factory;
 
 	const auto result = CreateDXGIFactory(__uuidof(IDXGIFactory),
-		reinterpret_cast<void**>(&p_factory));
+		reinterpret_cast<VOID**>(&p_factory));
 
 	if (result == S_OK)
 		factory = PTR<IDXGIFactory>(p_factory);
@@ -59,26 +46,31 @@ EXPORT HRESULT create_factory()
 
 }
 
-EXPORT HRESULT free_factory()
+EXPORT HRESULT free_resources()
 {
 	for (auto item : devices)
-	{
-		RtlZeroMemory(&item.descriptor, sizeof(DXGI_ADAPTER_DESC));
-		item.adapter.Reset();
-	}
+		free_device_item(item);
 
-	const auto result = factory.Reset();
+	CONST auto result = factory.Reset();
 
-	debug_print("free_factory");
+	debug_print("free_resources");
 	return result;
 }
 
-EXPORT HRESULT list_devices(_Out_ size_t* n_dev)
+EXPORT HRESULT list_devices(_Out_ INT* n_dev)
 {
 	if (factory.Get() == nullptr)
 		return E_POINTER;
 
 	auto result = S_OK;
+
+	if (!devices.empty())
+	{
+		for (auto dev : devices)
+			free_device_item(dev);
+
+		devices.clear();
+	}
 
 	for(unsigned int i = 0; result == S_OK; ++i)
 	{
@@ -89,35 +81,87 @@ EXPORT HRESULT list_devices(_Out_ size_t* n_dev)
 		{
 			device_item item{
 				PTR<IDXGIAdapter>{p_local_adapter},
-				DXGI_ADAPTER_DESC{}
+				DXGI_ADAPTER_DESC{},
+				nullptr,
+				nullptr
 			};
 			
 			if(item.adapter->GetDesc(&item.descriptor) != S_OK)
 				RtlZeroMemory(&item.descriptor, sizeof(DXGI_ADAPTER_DESC));
 
+			ID3D11Device* p_device;
+			ID3D11DeviceContext* p_context;
+			D3D_FEATURE_LEVEL acq_feature_level;
+
+			result = D3D11CreateDevice(
+				item.adapter.Get(),						 // Existing adapter
+				D3D_DRIVER_TYPE_UNKNOWN,				 // Should be unknown
+				nullptr,								 // Module for software emulation
+				global_device_creation_flags,			 // Creation flags
+				global_device_feature_levels,			 // Feature levels (req. 11.0)
+				_countof(global_device_feature_levels),	 // Size of array
+				D3D11_SDK_VERSION,						 // Work with DX11
+				&p_device,								 // Addr of device
+				&acq_feature_level,						 // Feature level supported
+				&p_context);							 // Immediate context
+
+			if(result == S_OK)
+			{
+				if(acq_feature_level != global_device_feature_levels[0])
+				{
+					p_context->Release();
+					p_device->Release();
+				}
+				else
+				{
+					item.device = PTR<ID3D11Device>{ p_device };
+					item.context = PTR<ID3D11DeviceContext>{ p_context };
+				}
+			}
+
 			devices.push_back(item);
 		}
 	}
 
-	*n_dev = devices.size();
+	*n_dev = static_cast<INT>(devices.size());
 
 	debug_print("list_devices");
 	return S_OK;
 }
 
-EXPORT HRESULT get_adapter_descriptor(_In_ const int index, _Out_ DXGI_ADAPTER_DESC* desc)
+EXPORT HRESULT get_adapter_descriptor(_In_ CONST INT index, _Out_ BYTE* desc)
 {
 	if (index < 0 || index >= static_cast<int>(devices.size()))
 		return E_INVALIDARG;
 
 	memcpy(desc, &(devices[index].descriptor), sizeof(DXGI_ADAPTER_DESC));
-
+	BOOL is_created = devices[index].device != nullptr;
+	memcpy(desc + sizeof(DXGI_ADAPTER_DESC), 
+		&is_created, 
+		sizeof(BOOL));
 	debug_print("get_adapter_descriptor");
 	return S_OK;
 }
 
+EXPORT HRESULT select_device(_In_ CONST INT dev_id)
+{
+	if (dev_id < 0 || dev_id > static_cast<INT>(devices.size()))
+	{
+		selected_device_id = -1;
+		return E_INVALIDARG;
+	}
 
-EXPORT void add(_In_ const int a, _In_ const int b, _Out_ int* c)
+	selected_device_id = dev_id;
+	for (auto i = 0; i < static_cast<INT>(devices.size()); ++i)
+		if (i != selected_device_id)
+			free_device_item(devices[i]);
+
+	debug_print("select_device");
+	return S_OK;
+}
+
+
+EXPORT VOID add(_In_ CONST INT a, _In_ CONST INT b, _Out_ INT* c)
 {
 	*c = a + b;
 }
@@ -125,7 +169,7 @@ EXPORT void add(_In_ const int a, _In_ const int b, _Out_ int* c)
 // ReSharper disable CppInconsistentNaming
 BOOL WINAPI DllMain(
 	HINSTANCE hinstDLL,  // handle to DLL module
-	const DWORD fdwReason,     // reason for calling function
+	CONST DWORD fdwReason,     // reason for calling function
 	LPVOID lpReserved)  // reserved
 // ReSharper restore CppInconsistentNaming
 {

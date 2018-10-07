@@ -37,7 +37,7 @@ namespace Tests
         public const string DllPath = "../../../../x64/Debug/Native_Compute.dll";
 #endif
 
-        [Theory]
+        //[Theory]
         public void Fail()
         {
             var path = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, DllPath));
@@ -45,7 +45,7 @@ namespace Tests
             using (var x = new DllHandler(path))
             {
                 var createFactory = x.GetMethod("create_factory", typeof(int));
-                var freeFactory = x.GetMethod("free_factory", typeof(int));
+                var freeFactory = x.GetMethod("free_resources", typeof(int));
                 var listDevices = x.GetMethod(
                     "list_devices",
                     typeof(int),
@@ -55,23 +55,33 @@ namespace Tests
                     "get_adapter_descriptor",
                     typeof(int),
                     typeof(int),
-                    typeof(DXGI_ADAPTER_DESC).MakeByRefType());
+                    typeof(DXGI_ADAPTER_DESC_EX).MakeByRefType());
 
                 createFactory.ExecuteNoParam();
 
 
                 listDevices.ExecuteOneOut(out int nDev);
 
-                var descs = new DXGI_ADAPTER_DESC[nDev];
+                var descs = new DXGI_ADAPTER_DESC_EX[nDev];
 
                 for (var i = 0; i < descs.Length; i++)
                 {
                     getAdapterDesc.ExecuteOneInOneOut(i, out descs[i]);
                 }
 
-                foreach(var d in descs)
-                    Console.Error.WriteLine($"{d.Description, -20}\t" +
-                                            $"{d.DedicatedVideoMemory.ToUInt64(), -15}");
+             
+                var index = Array.FindIndex(descs, d => d.IsDeviceCreated && d.DedicatedVideoMemory.ToUInt64() > 0);
+
+                if (index >= 0)
+                {
+                    var selectDevice = x.GetMethod("select_device", typeof(int), typeof(int));
+                    selectDevice.ExecuteOneIn(index);
+                    for (var i = 0; i < descs.Length; i++)
+                    {
+                        getAdapterDesc.ExecuteOneInOneOut(i, out descs[i]);
+                    }
+                }
+                            
 
                 freeFactory.ExecuteNoParam();
 

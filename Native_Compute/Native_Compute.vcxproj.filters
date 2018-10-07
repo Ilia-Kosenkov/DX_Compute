@@ -29,5 +29,11 @@
     <ClCompile Include="Interop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DeviceItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
