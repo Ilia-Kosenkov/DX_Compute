@@ -48,8 +48,7 @@ EXPORT HRESULT create_factory()
 
 EXPORT HRESULT free_resources()
 {
-	for (auto item : devices)
-		free_device_item(item);
+	devices.clear();
 
 	CONST auto result = factory.Reset();
 
@@ -65,12 +64,7 @@ EXPORT HRESULT list_devices(_Out_ INT* n_dev)
 	auto result = S_OK;
 
 	if (!devices.empty())
-	{
-		for (auto dev : devices)
-			free_device_item(dev);
-
 		devices.clear();
-	}
 
 	for(unsigned int i = 0; result == S_OK; ++i)
 	{
@@ -79,13 +73,9 @@ EXPORT HRESULT list_devices(_Out_ INT* n_dev)
 		result = factory->EnumAdapters(i, &p_local_adapter);
 		if(result == S_OK)
 		{
-			device_item item{
-				PTR<IDXGIAdapter>{p_local_adapter},
-				DXGI_ADAPTER_DESC{},
-				nullptr,
-				nullptr
-			};
-			
+			device_item item;
+			item.adapter = PTR<IDXGIAdapter>(p_local_adapter);
+						
 			if(item.adapter->GetDesc(&item.descriptor) != S_OK)
 				RtlZeroMemory(&item.descriptor, sizeof(DXGI_ADAPTER_DESC));
 
@@ -152,10 +142,7 @@ EXPORT HRESULT select_device(_In_ CONST INT dev_id)
 	}
 
 	selected_device_id = dev_id;
-	for (auto i = 0; i < static_cast<INT>(devices.size()); ++i)
-		if (i != selected_device_id)
-			free_device_item(devices[i]);
-
+	
 	debug_print("select_device");
 	return S_OK;
 }

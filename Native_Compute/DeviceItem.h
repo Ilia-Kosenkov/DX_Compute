@@ -24,13 +24,23 @@
 
 #include "Commons.h"
 
+
+
 struct device_item
 {
 	PTR<IDXGIAdapter> adapter;
-	DXGI_ADAPTER_DESC descriptor;
+	DXGI_ADAPTER_DESC descriptor{};
 	PTR<ID3D11Device> device;
 	PTR<ID3D11DeviceContext> context;
+
+
+	device_item();
+	device_item(CONST device_item& other) noexcept;
+	device_item(device_item&& other) noexcept;
+
+	device_item& operator=(CONST device_item& other) noexcept;
+	device_item& operator=(device_item&& other) noexcept;
+	
+	~device_item();
 };
 
-
-VOID free_device_item(device_item& item);

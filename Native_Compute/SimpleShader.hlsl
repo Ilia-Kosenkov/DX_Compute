@@ -20,17 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "Commons.h"
-
-VOID debug_print(CONST std::string& name)
+[numthreads(1, 1, 1)]
+void main( uint3 DTid : SV_DispatchThreadID )
 {
-	#ifdef _DEBUG
-	std::cerr <<
-		std::setw(40) <<
-		std::left <<
-		name <<
-		std::setw(10) <<
-		std::this_thread::get_id() <<
-		std::endl;
-	#endif
 }

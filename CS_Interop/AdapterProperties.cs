@@ -29,7 +29,7 @@ namespace CS_Interop
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     [DebuggerDisplay("{" + nameof(Description) + "} : {DedicatedVideoMemory.ToUInt64()}")]
     // ReSharper disable once InconsistentNaming
-    public struct DXGI_ADAPTER_DESC_EX
+    public struct AdapterProperties
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public string Description;

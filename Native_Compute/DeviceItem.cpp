@@ -22,16 +22,79 @@
 
 #include "DeviceItem.h"
 
-VOID free_device_item(device_item& item)
-{
-	item.context.Reset();
-	item.context = nullptr;
-	item.device.Reset();
-	item.device = nullptr;
-	item.adapter.Reset();
-	item.adapter = nullptr;
-	RtlZeroMemory(&item.descriptor, sizeof(DXGI_ADAPTER_DESC));
 
-	debug_print("free_device_item");
+
+device_item::device_item()
+{
+	debug_print("device_default_ctor");
 }
 
+device_item::device_item(CONST device_item& other) noexcept
+{
+	memcpy(&descriptor, &other.descriptor, sizeof(DXGI_ADAPTER_DESC));
+	adapter = other.adapter;
+	device = other.device;
+	context = other.context;
+
+	debug_print("device_copy_ctor");
+}
+
+device_item::device_item(device_item&& other) noexcept
+{
+	memcpy(&descriptor, &other.descriptor, sizeof(DXGI_ADAPTER_DESC));
+	RtlZeroMemory(&other.descriptor, sizeof(DXGI_ADAPTER_DESC));
+
+	adapter = nullptr;
+	other.adapter.Swap(adapter);
+
+	device = nullptr;
+	other.device.Swap(device);
+
+	context = nullptr;
+	other.context.Swap(context);
+
+	debug_print("device_move_ctor");
+}
+
+device_item& device_item::operator=(CONST device_item& other) noexcept
+{
+	memcpy(&descriptor, &other.descriptor, sizeof(DXGI_ADAPTER_DESC));
+	adapter = other.adapter;
+	device = other.device;
+	context = other.context;
+
+	debug_print("device_copy_assignment");
+	return *this;
+}
+
+device_item& device_item::operator=(device_item&& other) noexcept
+{
+	memcpy(&descriptor, &other.descriptor, sizeof(DXGI_ADAPTER_DESC));
+	RtlZeroMemory(&other.descriptor, sizeof(DXGI_ADAPTER_DESC));
+
+	adapter = nullptr;
+	other.adapter.Swap(adapter);
+
+	device = nullptr;
+	other.device.Swap(device);
+
+	context = nullptr;
+	other.context.Swap(context);
+
+	debug_print("device_move_assignment");
+
+	return *this;
+}
+
+device_item::~device_item()
+{
+	context.Reset();
+	context = nullptr;
+	device.Reset();
+	device = nullptr;
+	adapter.Reset();
+	adapter = nullptr;
+	RtlZeroMemory(&descriptor, sizeof(DXGI_ADAPTER_DESC));
+
+	debug_print("device_destructor");
+}

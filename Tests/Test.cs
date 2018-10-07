@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
 using System.IO;
 using CS_Interop;
 using NUnit.Framework;
@@ -55,14 +54,14 @@ namespace Tests
                     "get_adapter_descriptor",
                     typeof(int),
                     typeof(int),
-                    typeof(DXGI_ADAPTER_DESC_EX).MakeByRefType());
+                    typeof(AdapterProperties).MakeByRefType());
 
                 createFactory.ExecuteNoParam();
 
 
                 listDevices.ExecuteOneOut(out int nDev);
 
-                var descs = new DXGI_ADAPTER_DESC_EX[nDev];
+                var descs = new AdapterProperties[nDev];
 
                 for (var i = 0; i < descs.Length; i++)
                 {
@@ -70,17 +69,17 @@ namespace Tests
                 }
 
              
-                var index = Array.FindIndex(descs, d => d.IsDeviceCreated && d.DedicatedVideoMemory.ToUInt64() > 0);
+                //var index = Array.FindIndex(descs, d => d.IsDeviceCreated && d.DedicatedVideoMemory.ToUInt64() > 0);
 
-                if (index >= 0)
-                {
-                    var selectDevice = x.GetMethod("select_device", typeof(int), typeof(int));
-                    selectDevice.ExecuteOneIn(index);
-                    for (var i = 0; i < descs.Length; i++)
-                    {
-                        getAdapterDesc.ExecuteOneInOneOut(i, out descs[i]);
-                    }
-                }
+                //if (index >= 0)
+                //{
+                //    var selectDevice = x.GetMethod("select_device", typeof(int), typeof(int));
+                //    selectDevice.ExecuteOneIn(index);
+                //    for (var i = 0; i < descs.Length; i++)
+                //    {
+                //        getAdapterDesc.ExecuteOneInOneOut(i, out descs[i]);
+                //    }
+                //}
                             
 
                 freeFactory.ExecuteNoParam();
