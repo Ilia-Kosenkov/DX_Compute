@@ -22,11 +22,48 @@
 
 #include "DeviceItem.h"
 
+void device_item::force_resource_release() noexcept
+{
+	compiled_shaders.clear();
 
+	context.Reset();
+	context = nullptr;
+	device.Reset();
+	device = nullptr;
+	adapter.Reset();
+	adapter = nullptr;
+	RtlZeroMemory(&descriptor, sizeof(DXGI_ADAPTER_DESC));
+	
+	debug_print("CPP: device_force_resource_release");
+}
+
+HRESULT device_item::create_cs_shader(INT name_hash, VOID* p_buffer, CONST INT buffer_size)
+{
+	if (!device)
+		return E_FAIL;
+
+	if (compiled_shaders.count(name_hash) != 0)
+		return E_INVALIDARG;
+
+	ID3D11ComputeShader* p_shader;
+
+	CONST auto result = device->CreateComputeShader(p_buffer, buffer_size, nullptr, &p_shader);
+
+	if (result == S_OK)
+	{
+		compiled_shaders.insert(
+			std::map<INT, PTR<ID3D11ComputeShader>>::value_type(
+				name_hash,
+				PTR<ID3D11ComputeShader>(p_shader)));
+	}
+
+	debug_print("CPP: device_create_cs_shader");
+	return result;
+}
 
 device_item::device_item()
 {
-	debug_print("device_default_ctor");
+	debug_print("CPP: device_default_ctor");
 }
 
 device_item::device_item(CONST device_item& other) noexcept
@@ -36,7 +73,7 @@ device_item::device_item(CONST device_item& other) noexcept
 	device = other.device;
 	context = other.context;
 
-	debug_print("device_copy_ctor");
+	debug_print("CPP: device_copy_ctor");
 }
 
 device_item::device_item(device_item&& other) noexcept
@@ -53,7 +90,7 @@ device_item::device_item(device_item&& other) noexcept
 	context = nullptr;
 	other.context.Swap(context);
 
-	debug_print("device_move_ctor");
+	debug_print("CPP: device_move_ctor");
 }
 
 device_item& device_item::operator=(CONST device_item& other) noexcept
@@ -63,7 +100,7 @@ device_item& device_item::operator=(CONST device_item& other) noexcept
 	device = other.device;
 	context = other.context;
 
-	debug_print("device_copy_assignment");
+	debug_print("CPP: device_copy_assignment");
 	return *this;
 }
 
@@ -81,20 +118,14 @@ device_item& device_item::operator=(device_item&& other) noexcept
 	context = nullptr;
 	other.context.Swap(context);
 
-	debug_print("device_move_assignment");
+	debug_print("CPP: device_move_assignment");
 
 	return *this;
 }
 
 device_item::~device_item()
 {
-	context.Reset();
-	context = nullptr;
-	device.Reset();
-	device = nullptr;
-	adapter.Reset();
-	adapter = nullptr;
-	RtlZeroMemory(&descriptor, sizeof(DXGI_ADAPTER_DESC));
-
-	debug_print("device_destructor");
+	
+	force_resource_release();
+	debug_print("CPP: device_destructor");
 }

@@ -26,7 +26,7 @@ EXPORT HRESULT get_factory(_Out_ VOID** pp_factory)
 {
 	
 	*pp_factory = reinterpret_cast<void*>(factory.Get());
-	debug_print("get_factory");
+	debug_print("EXP: get_factory");
 	return *pp_factory == nullptr ? E_POINTER : S_OK;
 
 }
@@ -41,7 +41,7 @@ EXPORT HRESULT create_factory()
 	if (result == S_OK)
 		factory = PTR<IDXGIFactory>(p_factory);
 	
-	debug_print("create_factory");
+	debug_print("EXP: create_factory");
 	return result;
 
 }
@@ -52,7 +52,7 @@ EXPORT HRESULT free_resources()
 
 	CONST auto result = factory.Reset();
 
-	debug_print("free_resources");
+	debug_print("EXP: free_resources");
 	return result;
 }
 
@@ -115,13 +115,13 @@ EXPORT HRESULT list_devices(_Out_ INT* n_dev)
 
 	*n_dev = static_cast<INT>(devices.size());
 
-	debug_print("list_devices");
+	debug_print("EXP: list_devices");
 	return S_OK;
 }
 
 EXPORT HRESULT get_adapter_descriptor(_In_ CONST INT index, _Out_ BYTE* desc)
 {
-	if (index < 0 || index >= static_cast<int>(devices.size()))
+	if (index < 0 || index >= static_cast<INT>(devices.size()))
 		return E_INVALIDARG;
 
 	memcpy(desc, &(devices[index].descriptor), sizeof(DXGI_ADAPTER_DESC));
@@ -129,22 +129,28 @@ EXPORT HRESULT get_adapter_descriptor(_In_ CONST INT index, _Out_ BYTE* desc)
 	memcpy(desc + sizeof(DXGI_ADAPTER_DESC), 
 		&is_created, 
 		sizeof(BOOL));
-	debug_print("get_adapter_descriptor");
+	debug_print("EXP: get_adapter_descriptor");
 	return S_OK;
 }
 
-EXPORT HRESULT select_device(_In_ CONST INT dev_id)
+EXPORT HRESULT free_device_resources_forced(_In_ CONST INT index)
 {
-	if (dev_id < 0 || dev_id > static_cast<INT>(devices.size()))
-	{
-		selected_device_id = -1;
+	if (index < 0 || index >= static_cast<INT>(devices.size()))
 		return E_INVALIDARG;
-	}
 
-	selected_device_id = dev_id;
+	devices[index].force_resource_release();
 	
-	debug_print("select_device");
+	debug_print("EXP: free_device_resources_forced");
 	return S_OK;
+}
+
+HRESULT create_cs_shader(CONST INT dev_id, CONST INT name_hash, VOID* p_buffer, CONST INT buffer_size)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: create_cs_shader");
+		return devices[dev_id].create_cs_shader(name_hash, p_buffer, buffer_size);
 }
 
 
@@ -152,6 +158,8 @@ EXPORT VOID add(_In_ CONST INT a, _In_ CONST INT b, _Out_ INT* c)
 {
 	*c = a + b;
 }
+
+
 
 // ReSharper disable CppInconsistentNaming
 BOOL WINAPI DllMain(

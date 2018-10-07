@@ -25,14 +25,17 @@
 #include "Commons.h"
 
 
-
 struct device_item
 {
+	std::map<INT, PTR<ID3D11ComputeShader>> compiled_shaders;
 	PTR<IDXGIAdapter> adapter;
 	DXGI_ADAPTER_DESC descriptor{};
 	PTR<ID3D11Device> device;
 	PTR<ID3D11DeviceContext> context;
 
+
+	VOID force_resource_release() noexcept;
+	HRESULT create_cs_shader(_In_ INT name_hash, _In_ VOID* p_buffer, _In_ INT buffer_size);
 
 	device_item();
 	device_item(CONST device_item& other) noexcept;

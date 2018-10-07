@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
 using System.IO;
 using CS_Interop;
 using NUnit.Framework;
@@ -30,60 +31,39 @@ namespace Tests
     public class Test
     {
 #if X86
-        public const string DllPath = "../../../../Debug/Native_Compute.dll";
+        public const string DllPath = "../../../../Debug";
 #endif
 #if X64
-        public const string DllPath = "../../../../x64/Debug/Native_Compute.dll";
+        public const string DllPath = "../../../../x64/Debug";
 #endif
 
         //[Theory]
         public void Fail()
         {
-            var path = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, DllPath));
-            
-            using (var x = new DllHandler(path))
+            var dirPath = Path.GetFullPath(Path.Combine(
+                TestContext.CurrentContext.TestDirectory,
+                DllPath));
+
+            var path = Path.Combine(dirPath, "Native_Compute.dll");
+
+            using (var dll = new DxLibrary(path))
             {
-                var createFactory = x.GetMethod("create_factory", typeof(int));
-                var freeFactory = x.GetMethod("free_resources", typeof(int));
-                var listDevices = x.GetMethod(
-                    "list_devices",
-                    typeof(int),
-                    typeof(int).MakeByRefType());
+                dll.Initialize();
+                
+                var devs = dll.ListAvailableDevices();
 
-                var getAdapterDesc = x.GetMethod(
-                    "get_adapter_descriptor",
-                    typeof(int),
-                    typeof(int),
-                    typeof(AdapterProperties).MakeByRefType());
+                var index = Array.FindIndex(devs, d => d.Description.Contains("1060"));
 
-                createFactory.ExecuteNoParam();
+                var device = dll.CreateDevice(index);
 
-
-                listDevices.ExecuteOneOut(out int nDev);
-
-                var descs = new AdapterProperties[nDev];
-
-                for (var i = 0; i < descs.Length; i++)
+                using (var str = new FileStream(Path.Combine(dirPath, "SimpleShader.cso"), FileMode.Open))
                 {
-                    getAdapterDesc.ExecuteOneInOneOut(i, out descs[i]);
+                    var data = DxLibrary.LoadShaderByteCode(str);
+
+                    device.CreateCsShader(data, "SimpleShader");
                 }
 
-             
-                //var index = Array.FindIndex(descs, d => d.IsDeviceCreated && d.DedicatedVideoMemory.ToUInt64() > 0);
-
-                //if (index >= 0)
-                //{
-                //    var selectDevice = x.GetMethod("select_device", typeof(int), typeof(int));
-                //    selectDevice.ExecuteOneIn(index);
-                //    for (var i = 0; i < descs.Length; i++)
-                //    {
-                //        getAdapterDesc.ExecuteOneInOneOut(i, out descs[i]);
-                //    }
-                //}
-                            
-
-                freeFactory.ExecuteNoParam();
-
+                device.Dispose();
             }
         }
     }

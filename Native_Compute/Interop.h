@@ -43,14 +43,14 @@ PTR<IDXGIFactory> factory;
 std::vector<device_item> devices;
 INT selected_device_id = -1;
 
+
 // Exports
 EXPORT HRESULT get_factory(_Out_ VOID** pp_factory);
 EXPORT HRESULT create_factory();
 EXPORT HRESULT list_devices(_Out_ INT* n_dev);
 EXPORT HRESULT free_resources();
 EXPORT HRESULT get_adapter_descriptor(_In_ INT index, _Out_ BYTE* desc);
-EXPORT HRESULT select_device(_In_ INT dev_id);
-
-
+EXPORT HRESULT free_device_resources_forced(_In_ INT index);
+EXPORT HRESULT create_cs_shader(_In_ INT dev_id, _In_ INT name_hash, _In_ VOID* p_buffer, _In_ INT buffer_size);
 
 EXPORT VOID add(_In_ INT a, _In_ INT b, _Out_ INT* c);

@@ -28,11 +28,13 @@
 #include <d3d11.h>
 #include <dxgi.h>
 #include <vector>
+#include <map>
 // EXPERIMENTAL
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <thread>
+#include <mutex>
 // ReSharper restore CppUnusedIncludeDirective
 
 

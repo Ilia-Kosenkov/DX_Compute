@@ -25,12 +25,17 @@
 VOID debug_print(CONST std::string& name)
 {
 	#ifdef _DEBUG
+	static std::mutex mutex;
+
+	mutex.lock();
 	std::cerr <<
 		std::setw(40) <<
 		std::left <<
 		name <<
 		std::setw(10) <<
+		std::hex <<
 		std::this_thread::get_id() <<
 		std::endl;
+	mutex.unlock();
 	#endif
 }
