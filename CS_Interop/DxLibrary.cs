@@ -54,8 +54,8 @@ namespace CS_Interop
             if(IsOk((int)getFactory.DynamicInvoke(new object[1]), out _))
                 throw new InvalidOperationException("The library appears to be initialized outside of the current scope.");
 
-            GetMethod("create_factory", typeof(int)).ExecuteNoParam();
-            GetMethod("list_devices", typeof(int), typeof(int).MakeByRefType()).ExecuteOneOut(out _devNumber);
+            GetMethod("create_factory", typeof(int)).Execute();
+            GetMethod("list_devices", typeof(int), typeof(int).MakeByRefType()).ExecuteOut(out _devNumber);
 
             IsInitialized = true;
         }
@@ -70,7 +70,7 @@ namespace CS_Interop
             for(var i = 0 ; i < props.Length; i++)
                 GetMethod("get_adapter_descriptor", typeof(int), 
                         typeof(int), typeof(AdapterProperties).MakeByRefType())
-                    .ExecuteOneInOneOut(i, out props[i]);
+                    .ExecuteOut(i, out props[i]);
 
             return props;
         }

@@ -32,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -104,6 +105,10 @@
     <ProjectReference Include="..\CS_Interop\CS_Interop.csproj">
       <Project>{e6339476-6fc1-4f8c-86bd-83080b4c6a45}</Project>
       <Name>CS_Interop</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Managed\Managed.csproj">
+      <Project>{8f1f270a-12dd-4859-9dc4-4a542394aa23}</Project>
+      <Name>Managed</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

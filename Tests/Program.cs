@@ -27,8 +27,8 @@ namespace Tests
     {
         public static int Main(string[] args)
         {
-            new Test().Fail();
-
+            var t = new Test();
+            t.ManagedAdd();  
             return 0;
         }
     }

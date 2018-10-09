@@ -44,6 +44,7 @@ namespace CS_Interop
 
         public DllHandler(string path)
         {
+            
             var lPath = Path.GetFullPath(path);
 
             if (!File.Exists(lPath))
@@ -60,7 +61,6 @@ namespace CS_Interop
             FreeLibrary(_libPtr);
             IsDisposed = true;
         }
-
 
         public T GetMethod<T>(string name) where T : class
         {
@@ -102,8 +102,29 @@ namespace CS_Interop
 
                 return definedItem.FuncPtr;
             }
-            
+
             var ptr = GetProcAddress(_libPtr, name);
+
+            var defTp = DelegateBuilder.ABuilder.GetTypes().FirstOrDefault(x => x.Name == name);
+            if (!(defTp is null))
+            {
+                var isSame = defTp.BaseType == typeof(MulticastDelegate) &&
+                             defTp.GetMethods().FirstOrDefault(m => m.Name == "Invoke") is MethodInfo mi &&
+                             mi.ReturnType == returnType &&
+                             mi.GetParameters().Select(pi => pi.ParameterType).SequenceEqual(types);
+
+                if (isSame)
+                {
+                    var lfPtr = Marshal.GetDelegateForFunctionPointer(ptr, defTp);
+
+                    _definedTypes.Add(name,
+                        (Hash: hash, DynType: defTp, FuncPtr: lfPtr));
+
+                    return lfPtr;
+                }
+            }
+
+
 
             if (IsNullPtr(ptr, out var ex)) throw ex;
 
@@ -147,6 +168,7 @@ namespace CS_Interop
 
             _definedTypes.Add(name, 
                 (Hash:hash, DynType:t, FuncPtr: fPtr));
+
 
             return fPtr;
         }

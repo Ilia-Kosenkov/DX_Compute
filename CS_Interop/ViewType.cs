@@ -1,4 +1,4 @@
-// MIT License
+﻿// MIT License
 // 
 // Copyright(c) 2018 Ilia Kosenkov
 // 
@@ -20,12 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-StructuredBuffer<double> in_buffer_1 : register(t0);
-StructuredBuffer<double> in_buffer_2 : register(t1);
-RWStructuredBuffer<double> out_buffer : register(u0);
-
-[numthreads(1, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+namespace CS_Interop
 {
-	out_buffer[DTid.x] = in_buffer_1[DTid.x] + in_buffer_2[DTid.x];
+    public enum ViewType : byte
+    {
+        UnorderedAccess,
+        ShaderResource
+    }
 }

@@ -43,5 +43,6 @@
     <FxCompile Include="SimpleShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="SimpleShader2.hlsl" />
   </ItemGroup>
 </Project>

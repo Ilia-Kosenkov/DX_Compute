@@ -52,5 +52,27 @@ EXPORT HRESULT free_resources();
 EXPORT HRESULT get_adapter_descriptor(_In_ INT index, _Out_ BYTE* desc);
 EXPORT HRESULT free_device_resources_forced(_In_ INT index);
 EXPORT HRESULT create_cs_shader(_In_ INT dev_id, _In_ INT name_hash, _In_ VOID* p_buffer, _In_ INT buffer_size);
+EXPORT HRESULT create_structured_buffer(
+	_In_ INT dev_id,
+	_In_ INT name_hash,
+	_In_ VOID* p_data,
+	_In_ INT element_size,
+	_In_ INT element_count);
+EXPORT HRESULT get_buffer_desc(_In_ INT dev_id, _In_ INT name_hash);
+EXPORT HRESULT remove_buffer(_In_ INT dev_id, _In_ INT name_hash);
+EXPORT HRESULT create_srv(_In_ INT dev_id, _In_ INT name_hash, _In_ INT buff_name_hash);
+EXPORT HRESULT create_uav(_In_ INT dev_id, _In_ INT name_hash, _In_ INT buff_name_hash);
+EXPORT HRESULT remove_srv(_In_ INT dev_id, _In_ INT name_hash);
+EXPORT HRESULT remove_uav(_In_ INT dev_id, _In_ INT name_hash);
+EXPORT HRESULT buffer_memcpy(_In_ INT dev_id, _In_ INT dest_name_hash, _In_ INT src_name_hash);
+EXPORT HRESULT create_cpu_buffer(
+	_In_ INT dev_id,
+	_In_ INT name_hash,
+	_In_ INT element_size,
+	_In_ INT element_count);
+EXPORT HRESULT grab_buffer_data(_In_ INT dev_id, _In_ INT name_hash, _Inout_ VOID* destination);
+EXPORT HRESULT setup_context(_In_ INT dev_id, _In_ INT shader, _In_ INT* srvs, _In_ INT n_srvs, _In_ INT* uavs, _In_ INT n_uavs);
+EXPORT HRESULT clear_context(_In_ INT dev_id);
+EXPORT HRESULT dispatch(_In_ INT dev_id, _In_ UINT x, _In_ UINT y, _In_ UINT z);
 
 EXPORT VOID add(_In_ INT a, _In_ INT b, _Out_ INT* c);

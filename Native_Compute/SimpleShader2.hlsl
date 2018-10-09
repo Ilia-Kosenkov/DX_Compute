@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-StructuredBuffer<double> in_buffer_1 : register(t0);
-StructuredBuffer<double> in_buffer_2 : register(t1);
-RWStructuredBuffer<double> out_buffer : register(u0);
+StructuredBuffer<int> in_buffer_1 : register(t0);
+StructuredBuffer<int> in_buffer_2 : register(t1);
+RWStructuredBuffer<int> out_buffer : register(u0);
 
 [numthreads(1, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )

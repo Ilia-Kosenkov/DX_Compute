@@ -27,6 +27,9 @@
 
 struct device_item
 {
+	std::map<INT, PTR<ID3D11Buffer>> buffers;
+	std::map<INT, PTR<ID3D11UnorderedAccessView>> uavs;
+	std::map < INT, PTR<ID3D11ShaderResourceView>> srvs;
 	std::map<INT, PTR<ID3D11ComputeShader>> compiled_shaders;
 	PTR<IDXGIAdapter> adapter;
 	DXGI_ADAPTER_DESC descriptor{};
@@ -36,6 +39,22 @@ struct device_item
 
 	VOID force_resource_release() noexcept;
 	HRESULT create_cs_shader(_In_ INT name_hash, _In_ VOID* p_buffer, _In_ INT buffer_size);
+	HRESULT create_structured_buffer(
+		_In_ INT name_hash,
+		_In_ VOID* p_data,
+		_In_ INT element_size,
+		_In_ INT element_count);
+	HRESULT get_buffer_desc(_In_ INT name_hash) const;
+	HRESULT remove_buffer(_In_ INT name_hash);
+	HRESULT create_srv(_In_ INT name_hash, _In_ INT buff_name_hash);
+	HRESULT create_uav(_In_ INT name_hash, _In_ INT buff_name_hash);
+	HRESULT remove_srv(_In_ INT name_hash);
+	HRESULT remove_uav(_In_ INT name_hash);
+	HRESULT create_cpu_buffer(_In_ INT name_hash, _In_ INT element_size, _In_ INT element_count);
+	HRESULT buffer_memcpy(_In_ INT dest, _In_ INT src);  // NOLINT(readability-inconsistent-declaration-parameter-name)
+	HRESULT grab_buffer_data(_In_ INT name_hash, _Inout_ VOID* destination);
+	HRESULT setup_context(_In_ INT shader, _In_ INT* srvs, _In_ INT n_srvs, _In_ INT* uavs, _In_ INT n_uavs);
+	VOID clear_context() const;
 
 	device_item();
 	device_item(CONST device_item& other) noexcept;

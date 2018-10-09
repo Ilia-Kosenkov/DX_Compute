@@ -153,6 +153,129 @@ HRESULT create_cs_shader(CONST INT dev_id, CONST INT name_hash, VOID* p_buffer, 
 		return devices[dev_id].create_cs_shader(name_hash, p_buffer, buffer_size);
 }
 
+HRESULT create_structured_buffer(
+	CONST INT dev_id, CONST INT name_hash, VOID* p_data, CONST INT element_size, CONST INT element_count)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: create_structured_buffer");
+	return devices[dev_id].create_structured_buffer(name_hash, p_data, element_size, element_count);
+}
+
+HRESULT get_buffer_desc(CONST INT dev_id, CONST INT name_hash)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: get_buffer_desc");
+	return devices[dev_id].get_buffer_desc(name_hash);
+}
+
+HRESULT remove_buffer(CONST INT dev_id, CONST INT name_hash)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: remove_buffer");
+	return devices[dev_id].remove_buffer(name_hash);
+}
+
+HRESULT create_srv(CONST INT dev_id, CONST INT name_hash, CONST INT buff_name_hash)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: create_srv");
+	return devices[dev_id].create_srv(name_hash, buff_name_hash);
+}
+
+HRESULT create_uav(CONST INT dev_id, CONST INT name_hash, CONST INT buff_name_hash)
+{
+	if(dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: create_uav");
+	return devices[dev_id].create_uav(name_hash, buff_name_hash);
+}
+
+HRESULT remove_srv(CONST INT dev_id, CONST INT name_hash)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: remove_srv");
+	return devices[dev_id].remove_srv(name_hash);
+}
+
+HRESULT remove_uav(CONST INT dev_id, CONST INT name_hash)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: remove_uav");
+	return devices[dev_id].remove_uav(name_hash);
+}
+
+HRESULT buffer_memcpy(CONST INT dev_id, CONST INT dest_name_hash, CONST INT src_name_hash)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: buffer_memcpy");
+	return devices[dev_id].buffer_memcpy(dest_name_hash, src_name_hash);
+}
+
+HRESULT create_cpu_buffer(CONST INT dev_id, CONST INT name_hash, CONST INT element_size, CONST INT element_count)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: create_cpu_buffer");
+	return devices[dev_id].create_cpu_buffer(name_hash, element_size, element_count);
+}
+
+HRESULT grab_buffer_data(CONST INT dev_id, CONST INT name_hash, VOID* destination)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: grab_buffer_data");
+	return devices[dev_id].grab_buffer_data(name_hash, destination);
+}
+
+HRESULT setup_context(
+	CONST INT dev_id, CONST INT shader, INT* srvs, 
+	CONST INT n_srvs, INT* uavs, CONST INT n_uavs)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	debug_print("EXP: setup_context");
+	return devices[dev_id].setup_context(shader, srvs, n_srvs, uavs, n_uavs);
+}
+
+HRESULT clear_context(CONST INT dev_id)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+	
+	devices[dev_id].clear_context();
+
+	debug_print("EXP: clear_context");
+	return S_OK;
+}
+
+HRESULT dispatch(CONST INT dev_id, CONST UINT x, CONST UINT y, CONST UINT z)
+{
+	if (dev_id < 0 || dev_id >= static_cast<INT>(devices.size()))
+		return E_INVALIDARG;
+
+	devices[dev_id].context->Dispatch(x, y, z);
+	debug_print("EXP: dispatch");
+
+	return S_OK;
+}
 
 EXPORT VOID add(_In_ CONST INT a, _In_ CONST INT b, _Out_ INT* c)
 {

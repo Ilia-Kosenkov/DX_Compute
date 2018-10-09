@@ -21,12 +21,29 @@
 // SOFTWARE.
 
 using System;
+using System.Collections;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using CS_Interop;
 using NUnit.Framework;
 
 namespace Tests
 {
+    public class TestParamSource
+    {
+        public static IEnumerable ArraySizes
+        {
+            get
+            {
+                yield return 100;
+                yield return 10_000;
+                yield return 1_000_000;
+                yield return 10_000_000;
+            }
+        }
+    }
+
     [TestFixture]
     public class Test
     {
@@ -37,9 +54,33 @@ namespace Tests
         public const string DllPath = "../../../../x64/Debug";
 #endif
 
-        //[Theory]
-        public void Fail()
+        public Random r;
+
+
+
+        [SetUp]
+        public void Setup()
         {
+            r = new Random();
+        }
+
+        //[Theory]
+        //[TestCaseSource(typeof(TestParamSource), nameof(TestParamSource.ArraySizes))]
+        public void SimpleAdd(int n)
+        {
+            var buff1 = Enumerable.Range(0, n)
+                                  .Select(i => 1.0 * r.NextDouble())
+                                  .ToArray();
+            var buff2 = Enumerable.Range(0, n)
+                                  .Select(i => 1.0 * r.NextDouble())
+                                  .ToArray();
+
+            var sum = new double[n];
+            for (var i = 0; i < n; i++)
+                sum[i] = buff1[i] + buff2[i];
+
+            var result = new double[n];
+
             var dirPath = Path.GetFullPath(Path.Combine(
                 TestContext.CurrentContext.TestDirectory,
                 DllPath));
@@ -49,22 +90,60 @@ namespace Tests
             using (var dll = new DxLibrary(path))
             {
                 dll.Initialize();
-                
+
                 var devs = dll.ListAvailableDevices();
 
                 var index = Array.FindIndex(devs, d => d.Description.Contains("1060"));
 
-                var device = dll.CreateDevice(index);
-
-                using (var str = new FileStream(Path.Combine(dirPath, "SimpleShader.cso"), FileMode.Open))
+                using (var device = dll.CreateDevice(index))
                 {
-                    var data = DxLibrary.LoadShaderByteCode(str);
 
-                    device.CreateCsShader(data, "SimpleShader");
+                    using (var str = new FileStream(Path.Combine(dirPath, "SimpleShader.cso"), FileMode.Open))
+                    {
+                        var data = DxLibrary.LoadShaderByteCode(str);
+
+                        device.CreateCsShader(data, "SimpleShader");
+                    }
+
+                    var handle1 = device.CreateStructuredBufferFromPinned(buff1, "int_buff_1");
+                    var handle2 = device.CreateStructuredBufferFromPinned(buff2, "int_buff_2");
+                    device.CreateStructuredBuffer(Marshal.SizeOf<double>(), n, "out_buff");
+                    device.CreateCpuBuffer<double>(n, "cpu_buff");
+
+                    device.CreateView("srv_1", "int_buff_1", ViewType.ShaderResource);
+                    device.CreateView("srv_2", "int_buff_2", ViewType.ShaderResource);
+                    device.CreateView("uav", "out_buff", ViewType.UnorderedAccess);
+
+                    device.SetupContext("SimpleShader", new[] {"srv_1", "srv_2"}, new[] {"uav"});
+                    device.Dispatch((uint) n, 1, 1);
+
+
+                    device.BufferCopy("out_buff", "cpu_buff");
+                    device.GrabFromCpuBuffer(result, "cpu_buff");
+
+
+                    device.ClearContext();
+                    device.RemoveView("srv_1", ViewType.ShaderResource);
+                    device.RemoveView("srv_2", ViewType.ShaderResource);
+                    device.RemoveView("uav", ViewType.UnorderedAccess);
+                    device.RemoveBuffer("cpu_buff");
+                    device.RemoveBuffer("out_buff");
+                    device.RemoveBuffer("int_buff_2");
+                    device.RemoveBuffer("int_buff_1");
+
+
+                    handle1.Free();
+                    handle2.Free();
                 }
-
-                device.Dispose();
             }
+
+            Assert.That(result, Is.EqualTo(sum).AsCollection);
+        }
+
+        [Test]
+        public void ManagedAdd()
+        {
+           Managed.SimpleAdder.Run();
         }
     }
 }

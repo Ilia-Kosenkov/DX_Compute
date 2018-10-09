@@ -38,9 +38,8 @@ namespace CS_Interop
                 AppDomain.CurrentDomain.DefineDynamicAssembly(
                     AName, AssemblyBuilderAccess.Run);
 
-            public static readonly ModuleBuilder MBuilder = ABuilder
-                .DefineDynamicModule(AName.Name + "Module");
-
+            public static readonly ModuleBuilder MBuilder =
+                ABuilder.DefineDynamicModule("DynamicModule");
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -68,13 +67,13 @@ namespace CS_Interop
             [In] IntPtr ptr,
             [In] string name);
 
-        public static void ExecuteNoParam(this Delegate del)
+        public static void Execute(this Delegate del)
         {
            if (!IsOk((int) del.DynamicInvoke(), out var ex))
                 throw ex;
         }
 
-        public static void ExecuteOneOut<T>(this Delegate del, out T param)
+        public static void ExecuteOut<T>(this Delegate del, out T param)
         {
             var pars = new object[] {default(T)};
             if (!IsOk((int)del.DynamicInvoke(pars), out var ex))
@@ -82,18 +81,38 @@ namespace CS_Interop
             param = (T) pars[0];
         }
 
-        public static void ExecuteOneIn<T>(this Delegate del, T param)
+        public static void Execute<T>(this Delegate del, T param)
         {
             if (!IsOk((int)del.DynamicInvoke(param), out var ex))
                 throw ex;
         }
 
-        public static void ExecuteOneInOneOut<T1, T2>(this Delegate del, T1 inParam, out T2 outParam)
+        public static void ExecuteOut<T1, T2>(this Delegate del, T1 inParam, out T2 outParam)
         {
             var pars = new object[] { inParam, default(T2) };
             if (!IsOk((int)del.DynamicInvoke(pars), out var ex))
                 throw ex;
             outParam = (T2)pars[1];
+        }
+
+        public static void Execute<T1, T2>(this Delegate del, T1 inParam1, T2 inParam2)
+        {
+            if (!IsOk((int)del.DynamicInvoke(inParam1, inParam2), out var ex))
+                throw ex;
+        }
+
+        public static void ExecuteOut<T1, T2, T3>(this Delegate del, T1 inParam1, T2 inParam2, out T3 outParam)
+        {
+            var pars = new object[] { inParam1, inParam2, default(T3) };
+            if (!IsOk((int)del.DynamicInvoke(pars), out var ex))
+                throw ex;
+            outParam = (T3)pars[2];
+        }
+
+        public static void Execute<T1, T2, T3>(this Delegate del, T1 inParam1, T2 inParam2, T3 inParam3)
+        {
+            if (!IsOk((int)del.DynamicInvoke(inParam1, inParam2, inParam3), out var ex))
+                throw ex;
         }
 
 
